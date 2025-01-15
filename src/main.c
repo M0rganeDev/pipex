@@ -6,41 +6,33 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 08:51:51 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/07 13:15:25 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/15 16:09:10 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "pipex.h"
-#include "ft_printf.h"
-#include <stdlib.h>
-#include <unistd.h>
+#include <sys/wait.h>
+#include "unistd.h"
+#include "utils.h"
 
-static void	clear_map(char **map);
+static inline void	pipes_down(t_pipex *pipex)
+{
+	close(pipex->pipes[0]);
+	close(pipex->pipes[1]);
+}
 
 static void	free_pipex(t_pipex *pipex)
 {
-	int	index;
-
-	free(pipex->env_path);
-	index = -1;
 	clear_map(pipex->all_paths);
-}
-
-static void	clear_map(char **map)
-{
-	int	index;
-
-	index = -1;
-	while (map[++index])
-		free(map[index]);
-	free(map);
+	pipes_down(pipex);
 }
 
 static int	find_executable(t_pipex *pipex, int flag)
 {
 	char	**map;
 	char	*cmd;
+	char	**tmp;
+	char	*buffer;
 	int		i;
 
 	map = ft_split(pipex->paths[flag], ' ');
@@ -50,7 +42,12 @@ static int	find_executable(t_pipex *pipex, int flag)
 	{
 		if (path_has_executable(pipex->all_paths[i], cmd))
 		{
-			ft_println("found %s in %s", cmd, pipex->all_paths[i]);
+			tmp = ft_split(cmd, ' ');
+			cmd = ft_strjoin("/", tmp[0]);
+			buffer = ft_strjoin(pipex->all_paths[i], cmd);
+			pipex->paths[flag] = buffer;
+			clear_map(tmp);
+			free(cmd);
 			return (clear_map(map), 1);
 		}
 	}
@@ -58,10 +55,28 @@ static int	find_executable(t_pipex *pipex, int flag)
 	return (clear_map(map), 0);
 }
 
+static int	create_fork(t_pipex *pipex)
+{
+	int	pid1;
+	int	pid2;
+
+	pid1 = fork();
+	if (pid1 == 0)
+		exec_program(pipex, 0);
+	pid2 = fork();
+	if (pid2 == 0)
+		exec_program(pipex, 1);
+	waitpid(pid2, NULL, 0);
+	waitpid(pid1, NULL, 0);
+	return (0);
+}
+
 static int	start(char **argv, char **env)
 {
 	t_pipex	pipex;
+	char	*buffer;
 
+	buffer = (char *)malloc(sizeof(char) * 64);
 	if (access(argv[1], R_OK) != 0)
 		return (ft_println("file %s is not usable !", argv[1]));
 	if (access(argv[4], F_OK) == -1 || access(argv[4], W_OK))
@@ -69,6 +84,8 @@ static int	start(char **argv, char **env)
 	pipex = parse_argv(argv, env);
 	if (!find_executable(&pipex, 0) || !find_executable(&pipex, 1))
 		return (free_pipex(&pipex), 0);
+	create_fork(&pipex);
+	free(buffer);
 	return (free_pipex(&pipex), 0);
 }
 

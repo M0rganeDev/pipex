@@ -6,14 +6,25 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:54:48 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/07 12:59:28 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/15 11:57:59 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "pipex.h"
 #include "ft_printf.h"
 #include "libft.h"
 #include <unistd.h>
 #include <stdlib.h>
+
+void	clear_map(char **map)
+{
+	int	index;
+
+	index = -1;
+	while (map[++index])
+		free(map[index]);
+	free(map);
+}
 
 int	path_has_executable(const char *path, const char *cmd)
 {
@@ -69,4 +80,25 @@ int	ft_strstart(const char *target, const char *needle)
 		++index;
 	}
 	return (1);
+}
+
+int	find_executable(t_pipex *pipex, int flag)
+{
+	char	**map;
+	char	*cmd;
+	int		i;
+
+	map = ft_split(pipex->paths[flag], ' ');
+	cmd = map[0];
+	i = -1;
+	while (pipex->all_paths[++i])
+	{
+		if (path_has_executable(pipex->all_paths[i], cmd))
+		{
+			ft_println("found %s in %s", cmd, pipex->all_paths[i]);
+			return (clear_map(map), 1);
+		}
+	}
+	ft_println("could not find executable %s, check your $PATH", cmd);
+	return (clear_map(map), 0);
 }

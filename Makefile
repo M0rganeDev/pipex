@@ -13,7 +13,12 @@ OBJECTS = $(SOURCES:.c=.o)
 
 NAME = pipex
 
-all: $(NAME)
+all: libs $(NAME)
+	rm -rf build
+	mkdir build
+	touch build/test
+	touch build/test2
+	cp $(NAME) build/
 
 $(NAME): $(OBJECTS)
 	cc $(CFLAGS)  $(OBJECTS) -o $(NAME) $(LDFLAGS)
@@ -25,18 +30,10 @@ clean:
 	make -C ./libs/libft clean
 	rm -f $(OBJECTS)
 
-push:
-	git add *
-	git add .
-ifeq ($(m),)
-    $(error This task require a MESSAGE variable, please do make push m="your message")
-endif
-	git commit -m "$(m)"
-	git push
-
 fclean: clean
 	rm -f $(NAME)
 	make -C ./libs/libft fclean
+	rm -rf build
 
 re:
 	make fclean
