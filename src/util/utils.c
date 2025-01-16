@@ -6,10 +6,11 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:54:48 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/15 11:57:59 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/16 13:29:00 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "utils.h"
 #include "pipex.h"
 #include "ft_printf.h"
 #include "libft.h"
@@ -24,6 +25,12 @@ void	clear_map(char **map)
 	while (map[++index])
 		free(map[index]);
 	free(map);
+}
+
+void	pipe_down(t_pipex *pipex)
+{
+	close(pipex->pipes[0]);
+	close(pipex->pipes[1]);
 }
 
 int	path_has_executable(const char *path, const char *cmd)

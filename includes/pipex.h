@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 09:27:16 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/15 16:07:11 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/16 08:52:45 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ typedef struct s_pipex
 	char	**all_paths;
 	char	*env_path;
 	int		pipes[2];
+	int		channel[2];
 }	t_pipex;
 
 // parse argv, return a t_pipex instance if everything works

@@ -14,14 +14,17 @@ OBJECTS = $(SOURCES:.c=.o)
 NAME = pipex
 
 all: libs $(NAME)
-	rm -rf build
-	mkdir build
-	touch build/test
-	touch build/test2
-	cp $(NAME) build/
 
 $(NAME): $(OBJECTS)
 	cc $(CFLAGS)  $(OBJECTS) -o $(NAME) $(LDFLAGS)
+
+strict:
+	@# dirty hack, grep returns 1 if there's no instance of the word "Error"
+	@# https://stackoverflow.com/a/38485725
+	@norminette | (grep 'Error' || true)
+	@norminette > /dev/null
+	@echo "norminette check passed !"
+	make
 
 %.o: %.c
 	cc $(CFLAGS) -c $(INCLUDES) $< -o $@

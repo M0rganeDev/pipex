@@ -1,0 +1,35 @@
+name: Build Check
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Cache build dependencies
+        id: cache-build-deps
+        uses: actions/cache@v4
+        with:
+          path: /tmp/build-essential-cache
+          key: ${{ runner.os }}-build-essential-${{ hashFiles('Makefile') }}
+          restore-keys: |
+            ${{ runner.os }}-build-essential-
+
+      - name: Setup dependencies
+        run: |
+          if [ ! -f /tmp/build-essential-cache/.built ]; then
+            sudo apt update
+            sudo apt install -y build-essential
+            mkdir -p /tmp/build-essential-cache && touch /tmp/build-essential-cache/.built
+          fi
+
+      - name: Run make to build the project
+        run: make

@@ -6,11 +6,15 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:47:05 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/15 15:02:30 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/16 13:58:45 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include "ft_printf.h"
+#include "unistd.h"
+#include "utils.h"
+#include <errno.h>
 
 static char	*find_path_env(char **env)
 {
@@ -25,7 +29,10 @@ static char	*find_path_env(char **env)
 	return (NULL);
 }
 
-/*static char	**parse_args(char *full_str)
+/*
+ *	"Comment is invalid in this scope"
+ *	
+ * static char	**parse_args(char *full_str)
 {
 	char	**args;
 
@@ -59,13 +66,14 @@ static void	print_map(char **map)
 int	exec_program(t_pipex *pipex, int flag)
 {
 	char	**parsed_args;
-	int		result;
 
+	dup2(pipex->channel[1 - flag], 1 - flag);
+	close(pipex->channel[flag]);
+	dup2(pipex->pipes[flag], flag);
 	parsed_args = ft_split(pipex->base_argv[flag + 2], ' ');
-	(void)pipex;
-	(void)flag;
-	result = execve(pipex->paths[flag], parsed_args, pipex->base_env);
-	return (result);
+	if (execve(pipex->paths[flag], parsed_args, pipex->base_env) != 0)
+		return (errno);
+	return (0);
 }
 
 t_pipex	parse_argv(char **argv, char **env)

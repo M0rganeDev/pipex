@@ -6,25 +6,22 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 08:51:51 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/15 16:09:10 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/16 14:02:00 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ft_printf.h"
 #include "pipex.h"
 #include <sys/wait.h>
-#include "unistd.h"
+#include <unistd.h>
+#include <fcntl.h>
 #include "utils.h"
-
-static inline void	pipes_down(t_pipex *pipex)
-{
-	close(pipex->pipes[0]);
-	close(pipex->pipes[1]);
-}
 
 static void	free_pipex(t_pipex *pipex)
 {
+	close(pipex->pipes[0]);
+	close(pipex->pipes[1]);
 	clear_map(pipex->all_paths);
-	pipes_down(pipex);
 }
 
 static int	find_executable(t_pipex *pipex, int flag)
@@ -66,22 +63,27 @@ static int	create_fork(t_pipex *pipex)
 	pid2 = fork();
 	if (pid2 == 0)
 		exec_program(pipex, 1);
-	waitpid(pid2, NULL, 0);
+	pipe_down(pipex);
+	ft_println("waiting for pids %d and %d", pid1, pid2);
 	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
 	return (0);
 }
 
 static int	start(char **argv, char **env)
 {
 	t_pipex	pipex;
-	char	*buffer;
 
 	buffer = (char *)malloc(sizeof(char) * 64);
 	if (access(argv[1], R_OK) != 0)
 		return (ft_println("file %s is not usable !", argv[1]));
-	if (access(argv[4], F_OK) == -1 || access(argv[4], W_OK))
-		return (ft_println("file %s is not usable !", argv[4]));
 	pipex = parse_argv(argv, env);
+	pipex.pipes[0] = open(argv[1], O_RDONLY);
+	if (pipe(pipex.channel) < 0)
+		return (free_pipex(&pipex), 0);
+	pipex.pipes[1] = open(argv[3], O_TRUNC | O_CREAT | O_RDWR, 0000640);
+	if (pipex.pipes[1] == -1)
+		ft_println("Something went really fucking wrong !");
 	if (!find_executable(&pipex, 0) || !find_executable(&pipex, 1))
 		return (free_pipex(&pipex), 0);
 	create_fork(&pipex);
