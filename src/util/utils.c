@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:54:48 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/16 13:29:00 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/17 12:02:14 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,6 @@
 #include "libft.h"
 #include <unistd.h>
 #include <stdlib.h>
-
-void	clear_map(char **map)
-{
-	int	index;
-
-	index = -1;
-	while (map[++index])
-		free(map[index]);
-	free(map);
-}
-
-void	pipe_down(t_pipex *pipex)
-{
-	close(pipex->pipes[0]);
-	close(pipex->pipes[1]);
-}
 
 int	path_has_executable(const char *path, const char *cmd)
 {

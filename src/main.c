@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 08:51:51 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/16 14:02:00 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/17 12:00:41 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,6 @@ static int	start(char **argv, char **env)
 {
 	t_pipex	pipex;
 
-	buffer = (char *)malloc(sizeof(char) * 64);
 	if (access(argv[1], R_OK) != 0)
 		return (ft_println("file %s is not usable !", argv[1]));
 	pipex = parse_argv(argv, env);
@@ -87,7 +86,6 @@ static int	start(char **argv, char **env)
 	if (!find_executable(&pipex, 0) || !find_executable(&pipex, 1))
 		return (free_pipex(&pipex), 0);
 	create_fork(&pipex);
-	free(buffer);
 	return (free_pipex(&pipex), 0);
 }
 

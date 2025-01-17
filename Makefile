@@ -8,6 +8,7 @@ LDFLAGS = $(INCLUDES) -L$(LIBS)libft -lft
 SOURCES = src/main.c \
 		  src/pipex.c \
 		  src/util/utils.c \
+		  src/util/cleanup_utils.c \
 
 OBJECTS = $(SOURCES:.c=.o)
 
