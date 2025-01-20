@@ -6,11 +6,12 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 08:51:51 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/17 12:00:41 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/20 09:16:24 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
+#include "libft.h"
 #include "pipex.h"
 #include <sys/wait.h>
 #include <unistd.h>
@@ -45,6 +46,7 @@ static int	find_executable(t_pipex *pipex, int flag)
 			pipex->paths[flag] = buffer;
 			clear_map(tmp);
 			free(cmd);
+			free(buffer);
 			return (clear_map(map), 1);
 		}
 	}
@@ -77,10 +79,10 @@ static int	start(char **argv, char **env)
 	if (access(argv[1], R_OK) != 0)
 		return (ft_println("file %s is not usable !", argv[1]));
 	pipex = parse_argv(argv, env);
-	pipex.pipes[0] = open(argv[1], O_RDONLY);
+	pipex.pipes[0] = open(argv[2], O_RDONLY);
 	if (pipe(pipex.channel) < 0)
 		return (free_pipex(&pipex), 0);
-	pipex.pipes[1] = open(argv[3], O_TRUNC | O_CREAT | O_RDWR, 0000640);
+	pipex.pipes[1] = open(argv[4], O_TRUNC | O_CREAT | O_RDWR, 0000640);
 	if (pipex.pipes[1] == -1)
 		ft_println("Something went really fucking wrong !");
 	if (!find_executable(&pipex, 0) || !find_executable(&pipex, 1))
