@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:54:48 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/17 12:02:14 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/20 11:28:59 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,24 @@ int	ft_strstart(const char *target, const char *needle)
 		++index;
 	}
 	return (1);
+}
+
+// look for a relative / absolute path to find an executable in.
+// also turns pipex->paths into malloc'd strings 
+// so I dont have to check if they were malloc'd or not
+int	search_relative(t_pipex *pipex, int flag)
+{
+	char	*tmp;
+
+	ft_println("searching rel/abs cmd in %s", pipex->paths[flag]);
+	if (access(pipex->paths[flag], X_OK) == 0)
+	{
+		tmp = ft_strdup(pipex->paths[flag]);
+		pipex->paths[flag] = tmp;
+		return (1);
+	}
+	tmp = ft_strdup(" ");
+	return (0);
 }
 
 int	find_executable(t_pipex *pipex, int flag)

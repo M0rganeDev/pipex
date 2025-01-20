@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 08:51:51 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/20 09:16:24 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/20 11:33:25 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,14 @@
 
 static void	free_pipex(t_pipex *pipex)
 {
-	close(pipex->pipes[0]);
-	close(pipex->pipes[1]);
+	if (pipex->pipes[0] != -1)
+		close(pipex->pipes[0]);
+	if (pipex->pipes[1] != -1)
+		close(pipex->pipes[1]);
 	clear_map(pipex->all_paths);
 }
+
+int	search_relative(t_pipex *pipex, int flag, char *cmd);
 
 static int	find_executable(t_pipex *pipex, int flag)
 {
@@ -36,6 +40,8 @@ static int	find_executable(t_pipex *pipex, int flag)
 	map = ft_split(pipex->paths[flag], ' ');
 	cmd = map[0];
 	i = -1;
+	if (ft_strstart(cmd, ".") || ft_strstart(cmd, "/"))
+		return (search_relative(pipex, flag, cmd));
 	while (pipex->all_paths[++i])
 	{
 		if (path_has_executable(pipex->all_paths[i], cmd))
@@ -44,13 +50,10 @@ static int	find_executable(t_pipex *pipex, int flag)
 			cmd = ft_strjoin("/", tmp[0]);
 			buffer = ft_strjoin(pipex->all_paths[i], cmd);
 			pipex->paths[flag] = buffer;
-			clear_map(tmp);
-			free(cmd);
-			free(buffer);
-			return (clear_map(map), 1);
+			ft_println("found command in %s", pipex->paths[flag]);
+			return (clear_map(tmp), free(cmd), clear_map(map), 1);
 		}
 	}
-	ft_println("could not find executable %s, check your $PATH", cmd);
 	return (clear_map(map), 0);
 }
 
