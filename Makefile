@@ -17,7 +17,7 @@ NAME = pipex
 all: libs $(NAME)
 
 $(NAME): $(OBJECTS)
-	cc $(CFLAGS)  $(OBJECTS) -o $(NAME) $(LDFLAGS)
+	cc $(CFLAGS) -fsanitize=address $(OBJECTS) -o $(NAME) $(LDFLAGS)
 
 strict:
 	@# dirty hack, grep returns 1 if there's no instance of the word "Error"

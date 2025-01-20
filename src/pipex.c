@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:47:05 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/20 11:36:54 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/20 16:59:13 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,12 +68,15 @@ int	exec_program(t_pipex *pipex, int flag)
 {
 	char	**parsed_args;
 
+	if (flag == 0)
+		ft_println("using fd %d (pipex->channel[%d]) as fd %d",
+			pipex->channel[1 - flag], 1 - flag, flag);
 	dup2(pipex->channel[1 - flag], 1 - flag);
 	if (pipex->channel[flag] != -1)
 		close(pipex->channel[flag]);
 	dup2(pipex->pipes[flag], flag);
 	parsed_args = ft_split(pipex->base_argv[flag + 2], ' ');
-	if (execve(pipex->paths[flag], parsed_args, pipex->base_env) != 0)
+	if (execve(pipex->paths[flag], parsed_args, pipex->base_env) == -1)
 		return (errno);
 	return (0);
 }
