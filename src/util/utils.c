@@ -6,7 +6,7 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 11:54:48 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/20 11:28:59 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/22 10:54:35 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,19 +95,27 @@ int	find_executable(t_pipex *pipex, int flag)
 {
 	char	**map;
 	char	*cmd;
+	char	**tmp;
+	char	*buffer;
 	int		i;
 
 	map = ft_split(pipex->paths[flag], ' ');
 	cmd = map[0];
 	i = -1;
+	if (ft_strstart(cmd, ".") || ft_strstart(cmd, "/"))
+		return (search_relative(pipex, flag));
 	while (pipex->all_paths[++i])
 	{
 		if (path_has_executable(pipex->all_paths[i], cmd))
 		{
-			ft_println("found %s in %s", cmd, pipex->all_paths[i]);
-			return (clear_map(map), 1);
+			tmp = ft_split(cmd, ' ');
+			cmd = ft_strjoin("/", tmp[0]);
+			buffer = ft_strjoin(pipex->all_paths[i], cmd);
+			pipex->paths[flag] = buffer;
+			ft_println("found command in %s", pipex->paths[flag]);
+			return (clear_map(tmp), free(cmd), clear_map(map), 1);
 		}
 	}
-	ft_println("could not find executable %s, check your $PATH", cmd);
+	pipex->paths[flag] = NULL;
 	return (clear_map(map), 0);
 }

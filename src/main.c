@@ -6,17 +6,17 @@
 /*   By: morgane <git@morgane.dev>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 08:51:51 by morgane           #+#    #+#             */
-/*   Updated: 2025/01/20 11:33:25 by morgane          ###   ########.fr       */
+/*   Updated: 2025/01/22 10:49:50 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include "libft.h"
 #include "pipex.h"
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "utils.h"
+#include <errno.h>
 
 static void	free_pipex(t_pipex *pipex)
 {
@@ -24,12 +24,16 @@ static void	free_pipex(t_pipex *pipex)
 		close(pipex->pipes[0]);
 	if (pipex->pipes[1] != -1)
 		close(pipex->pipes[1]);
+	if (pipex->paths[0] != NULL)
+		free(pipex->paths[0]);
+	if (pipex->paths[1] != NULL)
+		free(pipex->paths[1]);
 	clear_map(pipex->all_paths);
 }
 
 int	search_relative(t_pipex *pipex, int flag, char *cmd);
 
-static int	find_executable(t_pipex *pipex, int flag)
+/*static int	find_executable(t_pipex *pipex, int flag)
 {
 	char	**map;
 	char	*cmd;
@@ -55,7 +59,7 @@ static int	find_executable(t_pipex *pipex, int flag)
 		}
 	}
 	return (clear_map(map), 0);
-}
+}*/
 
 static int	create_fork(t_pipex *pipex)
 {
@@ -82,14 +86,18 @@ static int	start(char **argv, char **env)
 	if (access(argv[1], R_OK) != 0)
 		return (ft_println("file %s is not usable !", argv[1]));
 	pipex = parse_argv(argv, env);
-	pipex.pipes[0] = open(argv[2], O_RDONLY);
+	find_executable(&pipex, 0);
+	find_executable(&pipex, 1);
+	pipex.pipes[0] = open(argv[1], O_RDONLY);
+	if (pipex.pipes[0] < 0)
+		ft_println("Bob, the builder can we fix it ? NO IT'S FUCKED ! %d",
+			errno);
 	if (pipe(pipex.channel) < 0)
 		return (free_pipex(&pipex), 0);
 	pipex.pipes[1] = open(argv[4], O_TRUNC | O_CREAT | O_RDWR, 0000640);
 	if (pipex.pipes[1] == -1)
-		ft_println("Something went really fucking wrong !");
-	if (!find_executable(&pipex, 0) || !find_executable(&pipex, 1))
-		return (free_pipex(&pipex), 0);
+		ft_println("Something went really fucking wrong ! errno : %d",
+			errno);
 	create_fork(&pipex);
 	return (free_pipex(&pipex), 0);
 }

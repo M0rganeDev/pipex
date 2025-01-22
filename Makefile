@@ -17,7 +17,7 @@ NAME = pipex
 all: libs $(NAME)
 
 $(NAME): $(OBJECTS)
-	cc $(CFLAGS) -fsanitize=address $(OBJECTS) -o $(NAME) $(LDFLAGS)
+	cc $(CFLAGS) $(OBJECTS) -o $(NAME) $(LDFLAGS)
 
 strict:
 	@# dirty hack, grep returns 1 if there's no instance of the word "Error"
@@ -43,6 +43,9 @@ re:
 	make fclean
 	make libs
 	make
+
+debug: all
+	valgrind --leak-check=full --show-leak-kinds=all -s --track-fds=yes --trace-children=yes ./$(NAME) test "grep a1" "wc -l" test2
 
 libs:
 	make -C ./libs/libft
